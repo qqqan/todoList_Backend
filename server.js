@@ -10,9 +10,7 @@ let = corsOptions = {
 app.use(cors(corsOptions))
 const db = require("./app/models")
 db.sequelize.sync()
-require('./app/routes/users.routes')(app)
-require('./app/routes/taskLists.routes')(app)
-require('./app/routes/subTasks.routes')(app)
+
 const verifyToken = require('./app/public/verifyToken')
 // 放行登录接口
 app.use((req, res, next) => {
@@ -23,6 +21,9 @@ app.use((req, res, next) => {
     }
 })
 
+require('./app/routes/users.routes')(app)
+require('./app/routes/taskLists.routes')(app)
+require('./app/routes/subTasks.routes')(app)
 app.get('/', (req, res) => {
     res.json({ 'message': "todoList" })
 })

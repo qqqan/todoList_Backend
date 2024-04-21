@@ -84,11 +84,37 @@ exports.login = (req, res) => {
         });
 };
 
+// 获取用户信息
+exports.getUserInfo = (req, res) => {
+    const id = req.user.id
+    Users.findOne({ where: { id: id } }).then(data => {
+        if (data !== null) {
+            res.send({
+                code: 200,
+                message: "获取用户数据成功",
+                data: data  // 返回用户数据
+            })
+        } else {
+            res.status(400).send({
+                message: "获取用户数据失败",
+                data: req.Users
+            })
+        }
+    }).catch(err => {
+        console.error(err);
+        res.status(500).send({
+            message: "服务器错误",
+            data: req.Users
+        });
+    })
+}
+
+
 // 退出登录
 exports.logout = (req, res) => {
     res.clearCookie('token')
     res.send({
-        code: 0,
+        code: 200,
         message: "退出成功"
     })
 

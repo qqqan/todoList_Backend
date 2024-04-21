@@ -4,6 +4,7 @@ module.exports = app => {
     router.post("/", users.register)
     router.post("/login", users.login)
     router.post("/logout", users.logout)
+    router.get('/', users.getUserInfo)
 
     app.use('/api/users', router)
 }

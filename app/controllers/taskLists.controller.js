@@ -42,7 +42,7 @@ exports.add = (req, res) => {
 
 // 获取全部数据
 exports.findAll = (req, res) => {
-    const { userId } = req.query
+    const { userId, category } = req.query
     if (!userId) {
         res.status(400).send({
             code: 400,
@@ -58,21 +58,145 @@ exports.findAll = (req, res) => {
                 message: "该用户不存在"
             })
         } else {
-            TaskLists.findAll({ where: { userId: userId } })
-                .then(data => {
+            // 全部数据
+            if (category === 'all') {
+                console.log("all")
+                TaskLists.findAll({
+                    where: { userId: userId },
+                    order: [
+                        ['date', 'ASC']
+                    ]
+                })
+                    .then(data => {
+                        res.send({
+                            code: 200,
+                            message: "获取数据成功",
+                            data: data
+                        })
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        res.status(500).send({
+                            code: 500,
+                            message: "服务器错误"
+                        });
+                    });
+            } else if (category === 'today') {
+                console.log("today")
+                // 今天
+                const today = new Date();
+                const formattedDate = today.toISOString().split('T')[0];
+                TaskLists.findAll({
+                    where: {
+                        [Op.or]: [
+                            {
+                                [Op.and]: [
+                                    {
+                                        userId: 1,
+                                        finished: 0
+                                    },
+                                    {
+                                        date: {
+                                            [Op.lte]: formattedDate
+                                        }
+                                    }
+                                ]
+
+                            },
+                            {
+                                [Op.and]: [
+                                    {
+                                        userId: 1,
+                                        finished: 1
+                                    },
+                                    {
+                                        date: {
+                                            [Op.eq]: formattedDate,
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    order: [
+                        ['date', 'ASC']
+                    ]
+                })
+                    .then(data => {
+                        res.send({
+                            code: 200,
+                            message: "获取数据成功",
+                            data: data
+                        })
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        res.status(500).send({
+                            code: 500,
+                            message: "服务器错误"
+                        });
+                    });
+            } else {
+                // 最近七天
+                console.log("thisDays")
+                const today = new Date();
+                const formattedDate = today.toISOString().split('T')[0]; // 获取今天日期，并将其格式化为'YYYY-MM-DD'
+
+                // 获取今天到未来七天的日期范围
+                const sevenDaysLater = new Date(today);
+                sevenDaysLater.setDate(today.getDate() + 7);
+
+                TaskLists.findAll({
+                    where: {
+                        [Op.or]: [
+                            {
+                                [Op.and]: [
+                                    {
+                                        userId: 1,
+                                        finished: 0
+                                    },
+                                    {
+                                        date: {
+                                            [Op.lt]: sevenDaysLater
+                                        }
+                                    }
+                                ]
+
+                            },
+                            {
+                                [Op.and]: [
+                                    {
+                                        userId: 1,
+                                        finished: 1
+                                    },
+                                    {
+                                        date: {
+                                            [Op.gte]: formattedDate,
+                                            [Op.lt]: sevenDaysLater
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    order: [
+                        ['date', 'ASC']
+                    ]
+                }).then(data => {
+                    console.log(data);
                     res.send({
                         code: 200,
                         message: "获取数据成功",
                         data: data
                     })
-                })
-                .catch(err => {
-                    console.error(err);
+                }).catch(err => {
+                    console.error('Error:', err);
                     res.status(500).send({
                         code: 500,
                         message: "服务器错误"
                     });
                 });
+            }
         }
     }).catch(err => {
         console.error(err);
