@@ -7,6 +7,7 @@ module.exports = app => {
     router.delete("/delete", taskLists.delete)
     router.patch("/update", taskLists.update)
     router.post("/calender", taskLists.findFinishedTasksInMonth)
+    router.patch("/updateFinished", taskLists.updateFinished)
 
     app.use('/api/tasklists', router)
 }

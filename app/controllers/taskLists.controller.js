@@ -355,3 +355,44 @@ exports.findFinishedTasksInMonth = (req, res) => {
         })
     })
 }
+
+// 修改finished接口
+exports.updateFinished = (req, res) => {
+    const { id, finished } = req.body
+    console.log(id, finished)
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    if (finished) {
+        TaskLists.update({ finished: finished, finishedDate: formattedDate },
+            { where: { id: id } })
+            .then(data => {
+                console.log(data);
+                res.send({
+                    code: 200,
+                    message: "修改finished成功"
+                })
+            }).catch(err => {
+                console.error('Error:', err);
+                res.status(500).send({
+                    code: 500,
+                    message: "服务器错误"
+                });
+            });
+    } else {
+        TaskLists.update({ finished: finished, finishedDate: null },
+            { where: { id: id } })
+            .then(data => {
+                console.log(data);
+                res.send({
+                    code: 200,
+                    message: "修改finished成功"
+                })
+            }).catch(err => {
+                console.error('Error:', err);
+                res.status(500).send({
+                    code: 500,
+                    message: "服务器错误"
+                });
+            });
+    }
+}
